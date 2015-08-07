@@ -134,4 +134,4 @@ class MILLI_SAM(dense_design_matrix.DenseDesignMatrix):
         args['stop'] = None
         args['fit_preprocessor'] = args['fit_test_preprocessor']
         args['fit_test_preprocessor'] = None
-        return MNIST(**args)
+        return MILLI_SAM(**args)
