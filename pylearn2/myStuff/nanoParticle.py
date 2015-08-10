@@ -37,35 +37,54 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
         if which_set not in ['train','valid', 'test']:
             raise ValueError(
             'Unrecognized which_set value "%s".' % (which_set,) +
-            '". Valid values are ["train","test"].')
+            '". Valid values are ["train","test", "valid"].')
 
         if control.get_load_data():
             path = "${PYLEARN2_DATA_PATH}/nanoParticle/"
+            #have to load in the whole array from the start anyway
+            import h5py
+            import numpy as np
+
+            nParticles = 262144
+            trainingFrac = .8
+            validFrac = .1
+
+            X = np.zeros((100, nParticles*6))
+            y = np.zeros((100, nParticles*3))
+
+            def getFilename(i):
+                base = path+'snapshot_'
+                if i<10:
+                    out= base+'00%d.hdf5'%i
+                elif i<100:
+                    out= base+'0%d.hdf5'%i
+                else:
+                    out= base+'%d.hdf5'%i
+                return serial.preprocess(out)
+
+            for i in xrange(101):
+                fname = getFilename(i)
+                f = h5py.File(fname, 'r')
+                coords = f['PartType1']['Coordinates'][()]
+                if i!=0:
+                    y[i-1,:] = coords.flatten()
+                if i!=100:
+                    vels = f['PartType1']['Velocities'][()]
+                    data = np.concatenate((coords, vels), axis = 1).flatten()
+                    X[i,:] = data
+                f.close()
+
             if which_set == 'train':
-                feature_path = path + 'nanoParticleTrainFeatures.gz'
-                label_path = path+'nanoParticleTrainLabels.gz'
+                X = X[:, :nParticles*trainingFrac*6]
+                y = y[:, :nParticles*trainingFrac*3]
             elif which_set == 'valid':
-                feature_path = path + 'nanoParticleValidFeatures.gz'
-                label_path = path+'nanoParticleValidLabels.gz'
+                X = X[:, nParticles*trainingFrac*6:nParticles*(trainingFrac+validFrac)*6]
+                y = y[:, nParticles*trainingFrac*3:nParticles*(trainingFrac+validFrac)*3]
             else:
                 assert which_set == 'test'
-                feature_path = path + 'nanoParticleTestFeatures.gz'
-                label_path = path+'nanoParticleTestLabels.gz'
+                X = X[:, nParticles*(trainingFrac+validFrac)*6:]
+                y = y[:, nParticles*(trainingFrac+validFrac)*3:]
 
-            # Path substitution done here in order to make the lower-level
-            # mnist_ubyte.py as stand-alone as possible (for reuse in, e.g.,
-            # the Deep Learning Tutorials, or in another package).
-            feature_path = serial.preprocess(feature_path)
-            label_path = serial.preprocess(label_path)
-
-            # Locally cache the files before reading them
-            #Not sure if it's necessary, but why not?
-            datasetCache = cache.datasetCache
-            feature_path = datasetCache.cache_file(feature_path)
-            label_path = datasetCache.cache_file(label_path)
-
-            X  = np.loadtxt(feature_path, delimiter=',')
-            y =  np.loadxt(label_path, delimiter = ',')
         else:
             #I don't know when this would be called, or why?
             #It should generate random data of the same dimensions, but I'm not gonna bother doing that.
@@ -89,7 +108,10 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
 
         #Shuffle used to be here, which I don't think is terrifically necessary
                                         #X=dimshuffle(X)
+        print 'Initiating Superclass'
         super(NANO_PARTICLE, self).__init__(X=X, y=y)
+        del X
+        del y
 
         assert not np.any(np.isnan(self.X))
 
@@ -101,7 +123,7 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
                                  'm=' + str(self.X.shape[1]))
             assert stop > start
             self.X = self.X[:, start:stop]
-            if self.X.shape[0] != stop - start:
+            if self.X.shape[1] != stop - start:
                 raise ValueError("X.shape[1]: %d. start: %d stop: %d"
                                  % (self.X.shape[1], start, stop))
             if len(self.y.shape) > 1:
@@ -110,6 +132,7 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
                 raise ValueError('y must have >1 dimension.')
 
             assert self.y.shape[1] == stop - start
+        print 'Done'
 
     def adjust_for_viewer(self, X):
         """
