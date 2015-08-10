@@ -30,7 +30,7 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
     stop : Where to stop slicing. Will not slice if None
     """
 
-    def __init__(self, which_set, start=None, stop=None):
+    def __init__(self, which_set, start=None, stop=None, nParticles = None):
 
         self.args = locals()
 
@@ -40,14 +40,25 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
             '". Valid values are ["train","test", "valid"].')
 
         if control.get_load_data():
+
             path = "${PYLEARN2_DATA_PATH}/nanoParticle/"
             #have to load in the whole array from the start anyway
             import h5py
             import numpy as np
+            totParticles = 262144
+            if nParticles is  None:
+                nParticles = totParticles
 
-            nParticles = 262144
             trainingFrac = .8
             validFrac = .1
+
+            if which_set == 'train':
+                slice = np.s_[:nParticles, :]
+            elif which_set == 'valid':
+                slice = np.s_[int(totParticles*trainingFrac):int(totParticles*trainingFrac)+nParticles, :]
+            else:
+                assert which_set == 'test'
+                slice = np.s_[int(totParticles*(trainingFrac+validFrac)):int(totParticles*(trainingFrac+validFrac))+nParticles, :]
 
             X = np.zeros((100, nParticles*6))
             y = np.zeros((100, nParticles*3))
@@ -65,25 +76,18 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
             for i in xrange(101):
                 fname = getFilename(i)
                 f = h5py.File(fname, 'r')
-                coords = f['PartType1']['Coordinates'][()]
+                coords = f['PartType1']['Coordinates'][slice]
+
                 if i!=0:
                     y[i-1,:] = coords.flatten()
                 if i!=100:
-                    vels = f['PartType1']['Velocities'][()]
+                    vels = f['PartType1']['Velocities'][slice]
                     data = np.concatenate((coords, vels), axis = 1).flatten()
                     X[i,:] = data
-                f.close()
+                    del data
 
-            if which_set == 'train':
-                X = X[:, :nParticles*trainingFrac*6]
-                y = y[:, :nParticles*trainingFrac*3]
-            elif which_set == 'valid':
-                X = X[:, nParticles*trainingFrac*6:nParticles*(trainingFrac+validFrac)*6]
-                y = y[:, nParticles*trainingFrac*3:nParticles*(trainingFrac+validFrac)*3]
-            else:
-                assert which_set == 'test'
-                X = X[:, nParticles*(trainingFrac+validFrac)*6:]
-                y = y[:, nParticles*(trainingFrac+validFrac)*3:]
+                del coords
+                f.close()
 
         else:
             #I don't know when this would be called, or why?
@@ -108,31 +112,27 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
 
         #Shuffle used to be here, which I don't think is terrifically necessary
                                         #X=dimshuffle(X)
-        print 'Initiating Superclass'
         super(NANO_PARTICLE, self).__init__(X=X, y=y)
         del X
         del y
 
         assert not np.any(np.isnan(self.X))
 
-        #Changing to slice off particles, not rows.
         if start is not None:
             assert start >= 0
-            if stop > self.X.shape[1]:
+            if stop > self.X.shape[0]:
                 raise ValueError('stop=' + str(stop) + '>' +
-                                 'm=' + str(self.X.shape[1]))
+                                 'm=' + str(self.X.shape[0]))
             assert stop > start
-            self.X = self.X[:, start:stop]
-            if self.X.shape[1] != stop - start:
-                raise ValueError("X.shape[1]: %d. start: %d stop: %d"
-                                 % (self.X.shape[1], start, stop))
+            self.X = self.X[start:stop, :]
+            if self.X.shape[0] != stop - start:
+                raise ValueError("X.shape[0]: %d. start: %d stop: %d"
+                                 % (self.X.shape[0], start, stop))
             if len(self.y.shape) > 1:
-                self.y = self.y[:, start:stop]
+                self.y = self.y[start:stop, :]
             else:
-                raise ValueError('y must have >1 dimension.')
-
-            assert self.y.shape[1] == stop - start
-        print 'Done'
+                self.y = self.y[start:stop]
+            assert self.y.shape[0] == stop - start
 
     def adjust_for_viewer(self, X):
         """
@@ -162,6 +162,13 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
         args['which_set'] = 'test'
         args['start'] = None
         args['stop'] = None
-        args['fit_preprocessor'] = args['fit_test_preprocessor']
-        args['fit_test_preprocessor'] = None
-        return MILLI_SAM(**args)
+        return NANO_PARTICLE(**args)
+
+def getTestSet(nParticles = 10, start = None, stop = None):
+    args = {}
+    args['which_set'] = 'test'
+    args['nParticles'] = nParticles
+    args['start'] = start
+    args['stop'] = stop
+    obj= NANO_PARTICLE(**args)
+    return obj.X, obj.y

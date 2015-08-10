@@ -1,6 +1,7 @@
 !obj:pylearn2.train.Train {
     dataset: &train !obj:pylearn2.myStuff.nanoParticle.NANO_PARTICLE {
         which_set: 'train',
+        nParticles: %(nParticles)i,
         start: %(start)i,
         stop: %(stop)i,
     },
@@ -8,14 +9,15 @@
         layers: [ !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'h0',
                      dim: %(dim_h0)i,
-                     sparse_init: 15
+                     sparse_init: 15,
+
                  },!obj:pylearn2.models.mlp.Linear {
                      layer_name: 'y',
                      dim: %(output)i,
                      irange: 0.
                  }
                 ],
-        nvis: %(stop)i,
+        nvis: %(nvis)i,
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
         batch_size: 1,
@@ -25,9 +27,15 @@
                 'train' : *train,
                 'valid' : !obj:pylearn2.myStuff.nanoParticle.NANO_PARTICLE {
                               which_set: 'valid',
+                              nParticles: %(nParticles)i,
+                              start: %(valid_start)i,
+                              stop: %(valid_stop)i,
                           },
                 'test'  : !obj:pylearn2.myStuff.nanoParticle.NANO_PARTICLE {
                               which_set: 'test',
+                              nParticles: %(nParticles)i,
+                              start: %(test_start)i,
+                              stop: %(test_stop)i,
                           }
             },
         learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
@@ -48,7 +56,7 @@
     },
     extensions: [ !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
              channel_name: 'valid_objective',
-             save_path: "%(save_path)s/milli_sam_1_best.pkl"
+             save_path: "%(save_path)s/nano_particle_1_best.pkl"
         }, !obj:pylearn2.training_algorithms.learning_rule.MomentumAdjustor {
             start: 1,
             saturate: 10,

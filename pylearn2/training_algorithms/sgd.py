@@ -467,6 +467,7 @@ class SGD(TrainingAlgorithm):
         for param in self.params:
             value = param.get_value(borrow=True)
             if not isfinite(value):
+                print value
                 raise RuntimeError("NaN in " + param.name)
 
     def continue_learning(self, model):
