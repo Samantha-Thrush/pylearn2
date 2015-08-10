@@ -16,13 +16,11 @@ from pylearn2.datasets import dense_design_matrix
 from pylearn2.datasets import control
 from pylearn2.datasets import cache
 from pylearn2.utils import serial
-from pylearn2.utils.rng import make_np_rng
+import numpy as np
 
-#NOTE: I pre-split the data up. It'd be possible to do that here, too, if the interest was in splitting it up in different amounts.
-
-class MILLI_SAM(dense_design_matrix.DenseDesignMatrix):
+class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
     """
-    The Millenium dataset SAMs results
+    Running on data from a simulation run by Bobby with a small amount of particles and large number of snapshots
 
     Parameters
     ----------
@@ -37,32 +35,37 @@ class MILLI_SAM(dense_design_matrix.DenseDesignMatrix):
         self.args = locals()
 
         if which_set not in ['train','valid', 'test']:
-            if which_set == 'valid':
-                raise ValueError(
-                'Unrecognized which_set value "%s".' % (which_set,) +
-                '". Valid values are ["train","test"].')
+            raise ValueError(
+            'Unrecognized which_set value "%s".' % (which_set,) +
+            '". Valid values are ["train","test"].')
 
         if control.get_load_data():
-            path = "${PYLEARN2_DATA_PATH}/milleniumSAMs/"
+            path = "${PYLEARN2_DATA_PATH}/nanoParticle/"
             if which_set == 'train':
-                data_path = path + 'milliTrain.pickle.gz'
+                feature_path = path + 'nanoParticleTrainFeatures.gz'
+                label_path = path+'nanoParticleTrainLabels.gz'
             elif which_set == 'valid':
-                data_path = path + 'milliValid.pickle.gz'
+                feature_path = path + 'nanoParticleValidFeatures.gz'
+                label_path = path+'nanoParticleValidLabels.gz'
             else:
                 assert which_set == 'test'
-                data_path = path + 'milliTest.pickle.gz'
+                feature_path = path + 'nanoParticleTestFeatures.gz'
+                label_path = path+'nanoParticleTestLabels.gz'
 
             # Path substitution done here in order to make the lower-level
             # mnist_ubyte.py as stand-alone as possible (for reuse in, e.g.,
             # the Deep Learning Tutorials, or in another package).
-            data_path = serial.preprocess(data_path)
+            feature_path = serial.preprocess(feature_path)
+            label_path = serial.preprocess(label_path)
 
             # Locally cache the files before reading them
             #Not sure if it's necessary, but why not?
             datasetCache = cache.datasetCache
-            data_path = datasetCache.cache_file(data_path)
+            feature_path = datasetCache.cache_file(feature_path)
+            label_path = datasetCache.cache_file(label_path)
 
-            X, y  = pickle.load(gzip.open(data_path))
+            X  = np.loadtxt(feature_path, delimiter=',')
+            y =  np.loadxt(label_path, delimiter = ',')
         else:
             #I don't know when this would be called, or why?
             #It should generate random data of the same dimensions, but I'm not gonna bother doing that.
@@ -79,29 +82,34 @@ class MILLI_SAM(dense_design_matrix.DenseDesignMatrix):
             y = np.random.randint(0, 10, (size, 1))
 
         m, r = X.shape
-        assert r == 193
+        assert m == 100
+
+        n, s = y.shape
+        assert n == 100
 
         #Shuffle used to be here, which I don't think is terrifically necessary
                                         #X=dimshuffle(X)
-        super(MILLI_SAM, self).__init__(X=X, y=y)
+        super(NANO_PARTICLE, self).__init__(X=X, y=y)
 
         assert not np.any(np.isnan(self.X))
 
+        #Changing to slice off particles, not rows.
         if start is not None:
             assert start >= 0
-            if stop > self.X.shape[0]:
+            if stop > self.X.shape[1]:
                 raise ValueError('stop=' + str(stop) + '>' +
-                                 'm=' + str(self.X.shape[0]))
+                                 'm=' + str(self.X.shape[1]))
             assert stop > start
-            self.X = self.X[start:stop, :]
+            self.X = self.X[:, start:stop]
             if self.X.shape[0] != stop - start:
-                raise ValueError("X.shape[0]: %d. start: %d stop: %d"
-                                 % (self.X.shape[0], start, stop))
+                raise ValueError("X.shape[1]: %d. start: %d stop: %d"
+                                 % (self.X.shape[1], start, stop))
             if len(self.y.shape) > 1:
-                self.y = self.y[start:stop, :]
+                self.y = self.y[:, start:stop]
             else:
-                self.y = self.y[start:stop]
-            assert self.y.shape[0] == stop - start
+                raise ValueError('y must have >1 dimension.')
+
+            assert self.y.shape[1] == stop - start
 
     def adjust_for_viewer(self, X):
         """

@@ -1,8 +1,8 @@
 import os
 import pylearn2
-os.environ['PYLEARN2_DATA_PATH'] = '/home/sean/GitRepos/pylearn2/data'
+os.environ['PYLEARN2_DATA_PATH'] = '/media/Backup'
 path = os.path.join(pylearn2.__path__[0], 'myStuff', 'nano_particle_1.yaml')
-nParticles = 100
+nParticles = 10
 with open(path, 'r') as f:
     train = f.read()
 hyper_params = {'start' : 0,
