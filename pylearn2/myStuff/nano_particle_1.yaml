@@ -9,7 +9,7 @@
         layers: [ !obj:pylearn2.models.mlp.RectifiedLinear {
                      layer_name: 'h0',
                      dim: %(dim_h0)i,
-                     sparse_init: 15,
+                     sparse_init: 1,
 
                  },!obj:pylearn2.models.mlp.Linear {
                      layer_name: 'y',
@@ -37,7 +37,9 @@
                               start: %(test_start)i,
                               stop: %(test_stop)i,
                           }
+
             },
+
         learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
             init_momentum: .5
         },

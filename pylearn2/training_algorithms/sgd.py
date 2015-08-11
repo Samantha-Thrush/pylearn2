@@ -417,6 +417,7 @@ class SGD(TrainingAlgorithm):
         # Make sure none of the parameters have bad values
         for param in self.params:
             value = param.get_value(borrow=True)
+            value
             if not isfinite(value):
                 raise RuntimeError("NaN in " + param.name)
 
@@ -466,8 +467,12 @@ class SGD(TrainingAlgorithm):
         # Make sure none of the parameters have bad values
         for param in self.params:
             value = param.get_value(borrow=True)
+            value
             if not isfinite(value):
                 print value
+                from matplotlib import pyplot as plt
+                plt.imshow(value)
+                plt.show()
                 raise RuntimeError("NaN in " + param.name)
 
     def continue_learning(self, model):

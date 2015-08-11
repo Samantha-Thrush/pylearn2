@@ -82,7 +82,7 @@ def predict(model_path, x, predictionType="regression", outputType="float",
     #return True
 
 # load the testing set to get the labels
-nParticles = 50
+nParticles = 1
 test_data, test_labels = getTestSet(nParticles, 95, 100)
 
 path = os.path.join(pylearn2.__path__[0], 'myStuff', sys.argv[1] )

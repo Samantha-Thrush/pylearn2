@@ -3,7 +3,7 @@ import pylearn2
 os.environ['PYLEARN2_DATA_PATH'] = '/media/Backup'
 path = os.path.join(pylearn2.__path__[0], 'myStuff', 'nano_particle_1.yaml')
 
-nParticles = 50
+nParticles = 1
 with open(path, 'r') as f:
     train = f.read()
 hyper_params = {'nParticles' : nParticles,
@@ -15,7 +15,7 @@ hyper_params = {'nParticles' : nParticles,
                 'valid_stop' : 95,
                 'test_start': 95,
                 'test_stop' : 100,
-                'dim_h0' : 50,
+                'dim_h0' : 1,
                 'max_epochs' : 100,
                 'learning_rate': 0.01,
                 'N_wait': 10,

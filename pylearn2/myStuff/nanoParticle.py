@@ -38,7 +38,6 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
             raise ValueError(
             'Unrecognized which_set value "%s".' % (which_set,) +
             '". Valid values are ["train","test", "valid"].')
-
         if control.get_load_data():
 
             path = "${PYLEARN2_DATA_PATH}/nanoParticle/"
@@ -63,6 +62,8 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
             X = np.zeros((100, nParticles*6))
             y = np.zeros((100, nParticles*3))
 
+            colors = ['b', 'g','r','y','k','m']
+
             def getFilename(i):
                 base = path+'snapshot_'
                 if i<10:
@@ -76,13 +77,32 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
             for i in xrange(101):
                 fname = getFilename(i)
                 f = h5py.File(fname, 'r')
-                coords = f['PartType1']['Coordinates'][slice]
+                ids = f['PartType1']['ParticleIDs'][()]
+                sorter = ids.argsort()
 
-                if i!=0:
-                    y[i-1,:] = coords.flatten()
+                coords = f['PartType1']['Coordinates'][()]
+                coords = coords[sorter]#sort by ids
+
+                #from matplotlib import pyplot as plt
+                #plt.scatter(coords[0, 0], coords[0,1], c = colors[i%len(colors)])
+
+                coords = coords[slice]
+
+                #if i == 100:
+                #    print which_set
+                #    plt.show()
+
+                #if i!=0:
+                #    y[i-1,:] = coords.flatten()
+                if i == 100:
+                    continue
+                y[i,:] = coords.flatten()
                 if i!=100:
-                    vels = f['PartType1']['Velocities'][slice]
+                    vels = f['PartType1']['Velocities'][()]
+                    vels = vels[sorter]
+                    vels = vels[slice]
                     data = np.concatenate((coords, vels), axis = 1).flatten()
+
                     X[i,:] = data
                     del data
 
