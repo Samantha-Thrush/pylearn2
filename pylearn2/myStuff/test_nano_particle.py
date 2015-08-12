@@ -9,7 +9,8 @@ import cPickle as pickle
 import gzip
 import pylearn2
 
-from pylearn2.utils import serial
+from pylearn2.utils import serial, isfinite
+
 from theano import tensor as T
 from theano import function
 
@@ -88,6 +89,14 @@ test_data, test_labels = getTestSet(nParticles, 95, 100)
 path = os.path.join(pylearn2.__path__[0], 'myStuff', sys.argv[1] )
 pred_mat = predict(path, test_data)
 
+if not isfinite(pred_mat):
+    print 'Not Finite!'
+
+#print test_data
+print test_labels[0,0]
+print
+print pred_mat[0,0]
+
 from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
 
@@ -120,6 +129,6 @@ def hexPlot(true_labels, pred_labels):
     cax = g.fig.add_axes([1, 0.20, .01, 0.5])
     cb = plt.colorbar(cax=cax)
     cb.set_label('$\log_{10}(\mathcal{N})$')
-    plt.show()
+    #plt.show()
 
 [hexPlot(test_labels[:,i], pred_mat[:,i]) for i in xrange(nParticles)]

@@ -20,7 +20,7 @@
         nvis: %(nvis)i,
     },
     algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
-        batch_size: 1,
+        batch_size: 10,
         learning_rate: %(learning_rate)f,
         monitoring_dataset:
             {
@@ -39,9 +39,16 @@
                           }
 
             },
+        cost: !obj:pylearn2.costs.cost.SumOfCosts { costs: [
+            !obj:pylearn2.costs.mlp.Default {
+            }, !obj:pylearn2.costs.mlp.WeightDecay {
+                coeffs: {'h0': .00005, 'y': .00005}
+            }
+            ]
+        },
 
         learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
-            init_momentum: .5
+            init_momentum: 0
         },
         termination_criterion: !obj:pylearn2.termination_criteria.And {
             criteria: [

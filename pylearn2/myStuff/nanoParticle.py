@@ -74,6 +74,8 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
                     out= base+'%d.hdf5'%i
                 return serial.preprocess(out)
 
+            absMinVel, absMaxVal = 0,0
+            maxCoord= 10000 #particles in a 0-10000 cube
             for i in xrange(101):
                 fname = getFilename(i)
                 f = h5py.File(fname, 'r')
@@ -82,6 +84,10 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
 
                 coords = f['PartType1']['Coordinates'][()]
                 coords = coords[sorter]#sort by ids
+
+                #normalize
+                #coordinates are all >=0, so just divide by max
+                coords/=maxCoord
 
                 #from matplotlib import pyplot as plt
                 #plt.scatter(coords[0, 0], coords[0,1], c = colors[i%len(colors)])
@@ -100,6 +106,14 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
                 if i!=100:
                     vels = f['PartType1']['Velocities'][()]
                     vels = vels[sorter]
+
+                    minVel, maxVel = vels.min(), vels.max()
+                    if minVel < absMinVel:
+                        absMinVel = minVel
+
+                    if maxVel > absMaxVal:
+                        absMaxVal = maxVel
+
                     vels = vels[slice]
                     data = np.concatenate((coords, vels), axis = 1).flatten()
 
@@ -108,6 +122,11 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
 
                 del coords
                 f.close()
+
+            #normalize the velocity columns
+            for n in xrange(nParticles):
+                for col in xrange(3):
+                    X[:, n*6+3+col] = (X[:, n*6+3+col]-absMinVel)/(absMaxVal-absMinVel)
 
         else:
             #I don't know when this would be called, or why?

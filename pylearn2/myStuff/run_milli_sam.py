@@ -4,8 +4,8 @@ os.environ['PYLEARN2_DATA_PATH'] = '/home/mclaughlin6464/GitRepos/pylearn2/data'
 path = os.path.join(pylearn2.__path__[0], 'myStuff', 'milli_sam_1.yaml')
 with open(path, 'r') as f:
     train = f.read()
-hyper_params = {'dim_h0' : 100,
-                'max_epochs' : 1000,
+hyper_params = {'dim_h0' : 20,
+                'max_epochs' : 100,
                 'learning_rate': 0.01,
                 'N_wait': 10,
                 'save_path' : '.'}
