@@ -83,19 +83,20 @@ def predict(model_path, x, predictionType="regression", outputType="float",
     #return True
 
 # load the testing set to get the labels
-nParticles = 1
+nParticles = 1000
 test_data, test_labels = getTestSet(nParticles, 95, 100)
-
-path = os.path.join(pylearn2.__path__[0], 'myStuff', sys.argv[1] )
+                                                    #sys.argv[1]
+path = os.path.join(pylearn2.__path__[0], 'myStuff', 'nano_particle_1_best.pkl' )
 pred_mat = predict(path, test_data)
 
 if not isfinite(pred_mat):
     print 'Not Finite!'
 
 #print test_data
-print test_labels[0,0]
-print
-print pred_mat[0,0]
+for i in xrange(nParticles):
+    for j in xrange(5):
+        print test_labels[j,i*3], pred_mat[j,i*3]
+    print
 
 from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
@@ -131,4 +132,4 @@ def hexPlot(true_labels, pred_labels):
     cb.set_label('$\log_{10}(\mathcal{N})$')
     #plt.show()
 
-[hexPlot(test_labels[:,i], pred_mat[:,i]) for i in xrange(nParticles)]
+#[hexPlot(test_labels[:,i], pred_mat[:,i]) for i in xrange(nParticles)]

@@ -39,16 +39,10 @@
                           }
 
             },
-        cost: !obj:pylearn2.costs.cost.SumOfCosts { costs: [
-            !obj:pylearn2.costs.mlp.Default {
-            }, !obj:pylearn2.costs.mlp.WeightDecay {
-                coeffs: {'h0': .00005, 'y': .00005}
-            }
-            ]
-        },
+
 
         learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
-            init_momentum: 0
+            init_momentum: .5
         },
         termination_criterion: !obj:pylearn2.termination_criteria.And {
             criteria: [

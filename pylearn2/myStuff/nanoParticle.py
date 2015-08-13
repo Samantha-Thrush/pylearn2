@@ -51,13 +51,17 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
             trainingFrac = .8
             validFrac = .1
 
-            if which_set == 'train':
-                slice = np.s_[:nParticles, :]
-            elif which_set == 'valid':
-                slice = np.s_[int(totParticles*trainingFrac):int(totParticles*trainingFrac)+nParticles, :]
-            else:
-                assert which_set == 'test'
-                slice = np.s_[int(totParticles*(trainingFrac+validFrac)):int(totParticles*(trainingFrac+validFrac))+nParticles, :]
+            np.random.seed(0)
+
+            idxs = np.random.choice(totParticles, nParticles)
+
+            #if which_set == 'train':
+            slice = np.s_[idxs, :]
+            #elif which_set == 'valid':
+            #    slice = np.s_[int(totParticles*trainingFrac):int(totParticles*trainingFrac)+nParticles, :]
+            #else:
+            #    assert which_set == 'test'
+            #    slice = np.s_[int(totParticles*(trainingFrac+validFrac)):int(totParticles*(trainingFrac+validFrac))+nParticles, :]
 
             X = np.zeros((100, nParticles*6))
             y = np.zeros((100, nParticles*3))
@@ -98,11 +102,11 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
                 #    print which_set
                 #    plt.show()
 
-                #if i!=0:
-                #    y[i-1,:] = coords.flatten()
-                if i == 100:
-                    continue
-                y[i,:] = coords.flatten()
+                if i!=0:
+                    y[i-1,:] = coords.flatten()
+                #if i == 100:
+                #    continue
+                #y[i,:] = coords.flatten()
                 if i!=100:
                     vels = f['PartType1']['Velocities'][()]
                     vels = vels[sorter]
