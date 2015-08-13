@@ -57,6 +57,7 @@ class NANO_PARTICLE(dense_design_matrix.DenseDesignMatrix):
 
             #if which_set == 'train':
             slice = np.s_[idxs, :]
+
             #elif which_set == 'valid':
             #    slice = np.s_[int(totParticles*trainingFrac):int(totParticles*trainingFrac)+nParticles, :]
             #else:
