@@ -23,7 +23,7 @@ train.main_loop()
 #Now, do the predictions
 import numpy as np
 import sys
-import cPickle, gzip
+import pickle, gzip
 
 from pylearn2.utils import serial
 from theano import tensor as T
