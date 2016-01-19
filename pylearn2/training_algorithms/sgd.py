@@ -469,7 +469,7 @@ class SGD(TrainingAlgorithm):
             value = param.get_value(borrow=True)
             value
             if not isfinite(value):
-                print value
+                print(value)
                 from matplotlib import pyplot as plt
                 plt.imshow(value)
                 plt.show()
