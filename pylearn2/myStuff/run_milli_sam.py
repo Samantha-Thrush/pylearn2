@@ -96,7 +96,7 @@ def predict(model_path, x, predictionType="regression", outputType="float",
 path = os.path.join(pylearn2.__path__[0], 'myStuff', 'mlp_2_best.pkl' )
 test_data, test_labels = cPickle.load(gzip.open('milliTest.pickle.gz', 'rb'))
 
-os.environ['PYLEARN2_DATA_PATH'] = '/home/mclaughlin6464/GitRepos/pylearn2/data'
+os.environ['PYLEARN2_DATA_PATH'] = '/notebooks/ml-sims/data'
 #have model name as input? I don't even know what it'll necessarily be.
 path = os.path.join(pylearn2.__path__[0], 'myStuff', 'mlp_2_best.pkl' )
 
