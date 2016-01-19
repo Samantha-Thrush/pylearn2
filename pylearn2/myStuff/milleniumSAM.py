@@ -43,7 +43,7 @@ class MILLI_SAM(dense_design_matrix.DenseDesignMatrix):
                 '". Valid values are ["train","test"].')
 
         if control.get_load_data():
-            path = "${PYLEARN2_DATA_PATH}/milleniumSAMs/"
+            path = "${PYLEARN2_DATA_PATH}/"
             if which_set == 'train':
                 data_path = path + 'milliTrain.pickle.gz'
             elif which_set == 'valid':
