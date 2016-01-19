@@ -4,7 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import os
 import pylearn2
-os.environ['PYLEARN2_DATA_PATH'] = '/home/mclaughlin6464/GitRepos/pylearn2/data'
+os.environ['PYLEARN2_DATA_PATH'] = '/notebooks/ml-sims/data'
 path = os.path.join(pylearn2.__path__[0], 'myStuff', 'milli_sam_1.yaml')
 with open(path, 'r') as f:
     train = f.read()
