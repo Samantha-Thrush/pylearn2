@@ -9,7 +9,7 @@ __maintainer__ = "LOL"
 __email__ = "mclaughlin6464@gmail.com"
 
 import numpy as np
-import cPickle as pickle
+import pickle
 import gzip
 #from theano.compat.six.moves import xrange
 from pylearn2.datasets import dense_design_matrix
